@@ -8,5 +8,5 @@ import com.lms.academics.model.Topic;
 
 public interface TopicRepository extends JpaRepository<Topic, Long> {
 
-    List<Topic> findByModuleModuleId(Long moduleId);
+    List<Topic> findByModule_ModuleId(Long moduleId);
 }

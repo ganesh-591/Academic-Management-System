@@ -6,13 +6,16 @@ import com.lms.academics.model.Topic;
 
 public interface TopicService {
 
-    Topic createTopic(Topic topic);
+    Topic create(Long moduleId, Topic topic);
 
-    Topic getTopicById(Long topicId);
+    Topic getById(Long id);
 
-    List<Topic> getAllTopics();
+    List<Topic> getAll();
 
-    Topic updateTopic(Long topicId, Topic topic);
+    List<Topic> getByModuleId(Long moduleId);
 
-    void deleteTopic(Long topicId);
+    // PATCH ONLY
+    Topic patchUpdate(Long id, Topic topic);
+
+    void delete(Long id);
 }

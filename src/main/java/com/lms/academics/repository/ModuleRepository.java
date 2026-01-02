@@ -8,5 +8,5 @@ import com.lms.academics.model.Module;
 
 public interface ModuleRepository extends JpaRepository<Module, Long> {
 
-    List<Module> findByCourseCourseId(Long courseId);
+    List<Module> findByCourse_CourseId(Long courseId);
 }

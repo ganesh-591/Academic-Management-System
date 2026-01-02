@@ -12,47 +12,61 @@ import com.lms.academics.service.CourseService;
 @Service
 public class CourseServiceImpl implements CourseService {
 
-    private final CourseRepository courseRepository;
+    private final CourseRepository repository;
 
-    public CourseServiceImpl(CourseRepository courseRepository) {
-        this.courseRepository = courseRepository;
+    public CourseServiceImpl(CourseRepository repository) {
+        this.repository = repository;
     }
 
     @Override
-    public Course createCourse(Course course) {
-        return courseRepository.save(course);
+    public Course create(Course course) {
+        return repository.save(course);
     }
 
     @Override
-    public Course getCourseById(Long courseId) {
-        return courseRepository.findById(courseId)
+    public Course getById(Long id) {
+        return repository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Course not found with id: " + courseId));
+                        new ResourceNotFoundException(
+                                "Course not found with id: " + id));
     }
 
     @Override
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+    public List<Course> getAll() {
+        return repository.findAll();
     }
 
     @Override
-    public Course updateCourse(Long courseId, Course course) {
-        Course existingCourse = getCourseById(courseId);
+    public Course patchUpdate(Long id, Course incoming) {
 
-        existingCourse.setCourseName(course.getCourseName());
-        existingCourse.setDescription(course.getDescription());
-        existingCourse.setDuration(course.getDuration());
-        existingCourse.setToolsCovered(course.getToolsCovered());
-        existingCourse.setCourseFee(course.getCourseFee());
-        existingCourse.setCertificateProvided(course.getCertificateProvided());
-        existingCourse.setStatus(course.getStatus());
+        Course existing = getById(id);
 
-        return courseRepository.save(existingCourse);
+        if (incoming.getCourseName() != null)
+            existing.setCourseName(incoming.getCourseName());
+
+        if (incoming.getDescription() != null)
+            existing.setDescription(incoming.getDescription());
+
+        if (incoming.getDuration() != null)
+            existing.setDuration(incoming.getDuration());
+
+        if (incoming.getToolsCovered() != null)
+            existing.setToolsCovered(incoming.getToolsCovered());
+
+        if (incoming.getCourseFee() != null)
+            existing.setCourseFee(incoming.getCourseFee());
+
+        if (incoming.getCertificateProvided() != null)
+            existing.setCertificateProvided(incoming.getCertificateProvided());
+
+        if (incoming.getStatus() != null)
+            existing.setStatus(incoming.getStatus());
+
+        return repository.save(existing);
     }
 
     @Override
-    public void deleteCourse(Long courseId) {
-        Course course = getCourseById(courseId);
-        courseRepository.delete(course);
+    public void delete(Long id) {
+        repository.delete(getById(id));
     }
 }

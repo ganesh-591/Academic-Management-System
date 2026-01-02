@@ -6,13 +6,16 @@ import com.lms.academics.model.Module;
 
 public interface ModuleService {
 
-    Module createModule(Module module);
+    Module create(Long courseId, Module module);
 
-    Module getModuleById(Long moduleId);
+    Module getById(Long id);
 
-    List<Module> getAllModules();
+    List<Module> getAll();
 
-    Module updateModule(Long moduleId, Module module);
+    List<Module> getByCourseId(Long courseId);
 
-    void deleteModule(Long moduleId);
+    // PATCH ONLY
+    Module patchUpdate(Long id, Module module);
+
+    void delete(Long id);
 }

@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.lms.academics.exception.ResourceNotFoundException;
+import com.lms.academics.model.Course;
 import com.lms.academics.model.Module;
+import com.lms.academics.repository.CourseRepository;
 import com.lms.academics.repository.ModuleRepository;
 import com.lms.academics.service.ModuleService;
 
@@ -13,47 +15,68 @@ import com.lms.academics.service.ModuleService;
 public class ModuleServiceImpl implements ModuleService {
 
     private final ModuleRepository moduleRepository;
+    private final CourseRepository courseRepository;
 
-    public ModuleServiceImpl(ModuleRepository moduleRepository) {
+    public ModuleServiceImpl(ModuleRepository moduleRepository,
+                             CourseRepository courseRepository) {
         this.moduleRepository = moduleRepository;
+        this.courseRepository = courseRepository;
     }
 
     @Override
-    public Module createModule(Module module) {
+    public Module create(Long courseId, Module module) {
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Course not found with id: " + courseId));
+
+        module.setCourse(course);
+
+        if (module.getStatus() == null) {
+            module.setStatus("ACTIVE");
+        }
+
         return moduleRepository.save(module);
     }
 
     @Override
-    public com.lms.academics.model.Module getModuleById(Long moduleId) {
-        return moduleRepository.findById(moduleId)
+    public Module getById(Long id) {
+        return moduleRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Module not found with id: " + moduleId));
+                        new ResourceNotFoundException(
+                                "Module not found with id: " + id));
     }
 
     @Override
-    public List<Module> getAllModules() {
+    public List<Module> getAll() {
         return moduleRepository.findAll();
     }
 
     @Override
-    public Module updateModule(Long moduleId, Module module) {
-        Module existingModule = getModuleById(moduleId);
-
-        existingModule.setModuleName(module.getModuleName());
-        existingModule.setDescription(module.getDescription());
-        existingModule.setModuleDuration(module.getModuleDuration());
-
-        // ✅ SAFE UPDATE (VERY IMPORTANT)
-        if (module.getCourse() != null) {
-            existingModule.setCourse(module.getCourse());
-        }
-
-        return moduleRepository.save(existingModule);
+    public List<Module> getByCourseId(Long courseId) {
+        return moduleRepository.findByCourse_CourseId(courseId);
     }
 
     @Override
-    public void deleteModule(Long moduleId) {
-        Module module = getModuleById(moduleId);
-        moduleRepository.delete(module);
+    public Module patchUpdate(Long id, Module incoming) {
+
+        Module existing = getById(id);
+
+        if (incoming.getModuleName() != null)
+            existing.setModuleName(incoming.getModuleName());
+
+        if (incoming.getDescription() != null)
+            existing.setDescription(incoming.getDescription());
+
+        if (incoming.getStatus() != null)
+            existing.setStatus(incoming.getStatus());
+
+        return moduleRepository.save(existing);
+    }
+
+    @Override
+    public void delete(Long id) {
+        moduleRepository.delete(getById(id));
     }
 }

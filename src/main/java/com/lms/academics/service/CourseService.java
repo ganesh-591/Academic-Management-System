@@ -6,13 +6,14 @@ import com.lms.academics.model.Course;
 
 public interface CourseService {
 
-    Course createCourse(Course course);
+    Course create(Course course);
 
-    Course getCourseById(Long courseId);
+    Course getById(Long id);
 
-    List<Course> getAllCourses();
+    List<Course> getAll();
 
-    Course updateCourse(Long courseId, Course course);
+    // PATCH ONLY
+    Course patchUpdate(Long id, Course course);
 
-    void deleteCourse(Long courseId);
+    void delete(Long id);
 }

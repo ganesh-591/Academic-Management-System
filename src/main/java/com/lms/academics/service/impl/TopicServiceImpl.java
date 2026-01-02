@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.lms.academics.exception.ResourceNotFoundException;
+import com.lms.academics.model.Module;
 import com.lms.academics.model.Topic;
+import com.lms.academics.repository.ModuleRepository;
 import com.lms.academics.repository.TopicRepository;
 import com.lms.academics.service.TopicService;
 
@@ -13,47 +15,69 @@ import com.lms.academics.service.TopicService;
 public class TopicServiceImpl implements TopicService {
 
     private final TopicRepository topicRepository;
+    private final ModuleRepository moduleRepository;
 
-    public TopicServiceImpl(TopicRepository topicRepository) {
+    public TopicServiceImpl(TopicRepository topicRepository,
+                            ModuleRepository moduleRepository) {
         this.topicRepository = topicRepository;
+        this.moduleRepository = moduleRepository;
     }
 
     @Override
-    public Topic createTopic(Topic topic) {
+    public Topic create(Long moduleId, Topic topic) {
+
+        Module module = moduleRepository.findById(moduleId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Module not found with id: " + moduleId));
+
+        topic.setModule(module);
+
+        if (topic.getStatus() == null) {
+            topic.setStatus("ACTIVE");
+        }
+
         return topicRepository.save(topic);
     }
 
     @Override
-    public Topic getTopicById(Long topicId) {
-        return topicRepository.findById(topicId)
+    public Topic getById(Long id) {
+        return topicRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Topic not found with id: " + topicId));
+                        new ResourceNotFoundException(
+                                "Topic not found with id: " + id));
     }
 
     @Override
-    public List<Topic> getAllTopics() {
+    public List<Topic> getAll() {
         return topicRepository.findAll();
     }
 
     @Override
-    public Topic updateTopic(Long topicId, Topic topic) {
-        Topic existing = getTopicById(topicId);
+    public List<Topic> getByModuleId(Long moduleId) {
+        return topicRepository.findByModule_ModuleId(moduleId);
+    }
 
-        existing.setTopicName(topic.getTopicName());
-        existing.setDescription(topic.getDescription());
-        existing.setTopicDuration(topic.getTopicDuration());
+    @Override
+    public Topic patchUpdate(Long id, Topic incoming) {
 
-        // 🔒 SAFE PARENT UPDATE
-        if (topic.getModule() != null) {
-            existing.setModule(topic.getModule());
-        }
+        Topic existing = getById(id);
+
+        if (incoming.getTopicName() != null)
+            existing.setTopicName(incoming.getTopicName());
+
+        // ✅ FIXED: correct getter/setter
+        if (incoming.getTopicDescription() != null)
+            existing.setTopicDescription(incoming.getTopicDescription());
+
+        if (incoming.getStatus() != null)
+            existing.setStatus(incoming.getStatus());
 
         return topicRepository.save(existing);
     }
 
     @Override
-    public void deleteTopic(Long topicId) {
-        Topic topic = getTopicById(topicId);
-        topicRepository.delete(topic);
+    public void delete(Long id) {
+        topicRepository.delete(getById(id));
     }
 }
